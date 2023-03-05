@@ -1,12 +1,11 @@
-package com.example.customerstest.dto;
+package com.example.customerstest.web.request;
 
 import lombok.Data;
 
-
 @Data
-public class UserDto {
+public class UserRequest {
     private String login;
-    private String name;
     private String email;
+    private String name;
     private String password;
 }

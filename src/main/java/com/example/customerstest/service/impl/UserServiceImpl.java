@@ -7,22 +7,25 @@ import com.example.customerstest.exceptions.UserExistException;
 import com.example.customerstest.exceptions.UserNotFoundException;
 import com.example.customerstest.repository.UserRepository;
 import com.example.customerstest.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
@@ -32,17 +35,19 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional
     public User create(UserDto userDto) {
         User user = new User();
-        user.setUsername(userDto.getUsername());
+        user.setLogin(userDto.getLogin());
         user.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
         user.setName(userDto.getName());
-        user.setRoles(Collections.singleton(new Role("ROLE_USER")));
+        user.setEmail(userDto.getEmail());
+        user.setRoles(Collections.singleton(new Role("USER")));
         try {
             return userRepository.save(user);
         } catch (Exception e) {
             log.info("Ошибка при регистрации", e.getMessage());
-            throw new UserExistException("этот пользователь " + user.getUsername() + " уже зарегестрирован");
+            throw new UserExistException("этот пользователь " + user.getLogin() + " уже зарегестрирован");
         }
     }
 
@@ -64,10 +69,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean update(User newUser) {
-        User user = userRepository.findById(newUser.getId()).orElseThrow();
+    @Transactional
+    public boolean update(User newUser, Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("обновлять нечего"));
+        newUser.setId(id);
+        newUser.setPassword(bCryptPasswordEncoder.encode(newUser.getPassword()));
         newUser.setRoles(user.getRoles());
-        userRepository.saveAndFlush(newUser);
+        userRepository.save(newUser);
         return true;
     }
 
