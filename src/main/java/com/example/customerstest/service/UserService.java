@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UserService {
     List<User> findAllUsers();
-    User findById(long id);
+    User findByLogin(String login);
     User create(UserDto user);
     boolean delete(long id);
     boolean update(User user, Long id);
