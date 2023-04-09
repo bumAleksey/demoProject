@@ -14,8 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -57,8 +59,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User c id " + id + " не наден"));
+    public User findByLogin(String login) {
+        User user = userRepository.findUserByLogin(login);
+        Set<Role> roleSet = user.getRoles();
+        for (Role r : roleSet) {
+            System.out.println(r.toString());
+        }
+        return user;
     }
 
 
@@ -79,4 +86,25 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    //генерация данныйх юзеров при запуске;
+
+    @PostConstruct
+    public void init() {
+        User user = new User();
+        user.setLogin("Valmont");
+        user.setPassword(bCryptPasswordEncoder.encode("12345"));
+        user.setEmail("valmont@mail.ru");
+        user.setName("Vlad");
+        user.setRoles(Collections.singleton(new Role("ADMIN")));
+        userRepository.save(user);
+
+        User user1 = new User();
+        user1.setLogin("Anliks");
+        user1.setPassword(bCryptPasswordEncoder.encode("12345"));
+        user1.setEmail("anliks@mail.ru");
+        user1.setName("Max");
+        user1.setRoles(Collections.singleton(new Role("USER")));
+        userRepository.save(user1);
+
+    }
 }

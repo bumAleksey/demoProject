@@ -1,6 +1,7 @@
 package com.example.customerstest.config;
 
-import lombok.RequiredArgsConstructor;
+
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,13 +12,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
+
 
     @Bean
     BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -26,15 +28,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.httpBasic().and().authorizeRequests() .antMatchers("/admin/**").hasAuthority("ADMIN")
+
+        http.authorizeRequests()
+                .antMatchers("/admin/**").permitAll()
+                .antMatchers("/city/**").permitAll()
                 .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .and()
-                .csrf().disable()
-                .formLogin(); //форма выколючена
+                .anyRequest().authenticated()
+                .and().csrf().disable()
+                .httpBasic();
 
     }
-  @Override
-  public void configure(AuthenticationManagerBuilder auth) throws Exception {
-      auth.userDetailsService(userDetailsService);
-  }
+
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+
+    }
 }

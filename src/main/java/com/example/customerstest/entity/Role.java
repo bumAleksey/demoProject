@@ -1,16 +1,13 @@
 package com.example.customerstest.entity;
 
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 
-@Getter
-@Setter
 @Entity
+@Data
 @Table(name = "roles")
 public class Role  {
     @Id
@@ -24,13 +21,5 @@ public class Role  {
     }
 
     public Role() {
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
     }
 }
