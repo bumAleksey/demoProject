@@ -26,7 +26,7 @@ public class AdminController {
         this.userMapper = userMapper;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/")
     public ResponseEntity<List<UserDto>> allUsers() {
         List<UserDto> list = userService.findAllUsers().stream()
                 .map(userMapper::userToUserDto)
@@ -34,9 +34,9 @@ public class AdminController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @GetMapping("/")
-    public ResponseEntity<UserDto> getUser(@ModelAttribute("login") String login) {
-        User user = userService.findByLogin(login);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+        User user = userService.findById(id);
         UserDto userDto = userMapper.userToUserDto(user);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }

@@ -4,27 +4,25 @@ import com.example.customerstest.entity.City;
 import com.example.customerstest.entity.User;
 import com.example.customerstest.repository.CityRepository;
 import com.example.customerstest.service.CityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.customerstest.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 
 @Service
+@RequiredArgsConstructor
 public class CityServiceImpl implements CityService {
 
     private final CityRepository cityRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
 
-    @Autowired
-    public CityServiceImpl(CityRepository cityRepository, UserServiceImpl userService) {
-        this.cityRepository = cityRepository;
-        this.userService = userService;
-    }
 
     @Override
+    @Transactional
     public City addCityForUser(String login, City city) {
         User user = userService.findByLogin(login);
         List<City> list = userCitiesList(login);
@@ -51,6 +49,7 @@ public class CityServiceImpl implements CityService {
 
 
     @Override
+    @Transactional
     public void setMainCityForUser(String login, Long id) {
         checkMainCityForUser(cityRepository.findCitiesByUserLogin(login));
         City city = cityRepository.findById(id).get();
@@ -64,15 +63,17 @@ public class CityServiceImpl implements CityService {
     }
 
 
-    private City checkMainCityForUser(List<City> userCityList) {
+    private void checkMainCityForUser(List<City> userCityList) {
         City city = userCityList.stream().filter(City::isMain).findFirst().orElse(null);
-        if (city == null) return null;
-        city.setMain(false);
-        return cityRepository.save(city);
+        if (city != null) {
+            city.setMain(false);
+            cityRepository.save(city);
+        }
     }
 
 
-    private City checkCityForCoordinates(List<City> list, long latitude, long longitude) {
+    @Override
+    public City checkCityForCoordinates(List<City> list, double latitude, double longitude) {
         return list.stream()
                 .filter(city -> city.getLatitude() == latitude
                         && city.getLongitude() == longitude).findFirst().orElse(null);
@@ -80,7 +81,7 @@ public class CityServiceImpl implements CityService {
 
     //генерация городов для теста
 
-    @PostConstruct
+   /* @PostConstruct
     public void init() {
         User user = new User();
         user.setId(1L);
@@ -102,7 +103,6 @@ public class CityServiceImpl implements CityService {
         city1.setMain(true);
         city1.setUser(user);
         cityRepository.save(city1);
-
-    }
+    }*/
 
 }

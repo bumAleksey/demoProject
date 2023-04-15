@@ -10,4 +10,5 @@ public interface CityService {
      boolean deleteCityForUser(String login, Long id);
      List<City> userCitiesList(String Login);
      void setMainCityForUser(String login, Long id);
+     City checkCityForCoordinates(List<City> list, double latitude, double longitude);
 }
