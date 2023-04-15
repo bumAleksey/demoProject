@@ -6,10 +6,13 @@ import com.example.customerstest.entity.User;
 import com.example.customerstest.exceptions.UserExistException;
 import com.example.customerstest.exceptions.UserNotFoundException;
 import com.example.customerstest.repository.UserRepository;
+import com.example.customerstest.service.CityService;
 import com.example.customerstest.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,24 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
 
 
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
     private final UserRepository userRepository;
 
-    @Autowired
     public UserServiceImpl(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
     }
-
 
     @Override
     @Transactional
@@ -61,17 +62,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByLogin(String login) {
         User user = userRepository.findUserByLogin(login);
-        Set<Role> roleSet = user.getRoles();
-        for (Role r : roleSet) {
-            System.out.println(r.toString());
-        }
         return user;
+    }
+    @Override
+    public User findById(Long id) {
+       return userRepository.findById(id).get();
     }
 
 
     @Override
+   @Transactional
     public boolean delete(long id) {
         userRepository.deleteById(id);
+        ///
         return true;
     }
 

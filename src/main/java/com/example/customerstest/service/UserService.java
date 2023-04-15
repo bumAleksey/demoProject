@@ -11,4 +11,5 @@ public interface UserService {
     User create(UserDto user);
     boolean delete(long id);
     boolean update(User user, Long id);
+    User findById(Long id);
 }
